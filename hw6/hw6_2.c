@@ -8,11 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h> 
-//#include <h.h> 
+#include "h.h" 
 
 typedef  float  fl;
 volatile fl	R;
-extern const fl	Pi = 3.14f; 
+ 
 fl S;
 
 fl	Area_Circle (fl R){	/*  Функция вычисления площади круга */
