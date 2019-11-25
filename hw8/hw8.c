@@ -6,7 +6,7 @@
 #define STACK_SIZE 10
 
 int n = 20, num_t;  
-char y_n, str[20]; 
+char y_n, str[20], A[8] = {'*'}; 
 
 struct Stack{
   int id;				// id - индекс элемента в массива 
@@ -15,7 +15,7 @@ struct Stack{
   int time_work;  		// Время выполнения задачи
   struct Stack * Next;
 };
-struct Stack Task[STACK_SIZE];
+struct Stack Task[STACK_SIZE], tmpTask;
 
 /********************************************************************************************/
 
@@ -25,8 +25,8 @@ void push(int * head, struct Stack * newTask ){  // Добавление в ст
         	abort();
   	}
  		else {	Task[++*head] =*newTask;
-				Task[*head-1].Next =&Task[*head];
-				Task[*head].Next =0;
+			Task[*head-1].Next =&Task[*head];
+			Task[*head].Next =0;
   			 }
 }
 
@@ -38,13 +38,13 @@ void initPriority(struct Stack * Task) {		// Функция создания  п
 
 /***********************************************************************************************/
 
-void init_TimeWork(struct Stack * Task) { 	// Функция генерирования времени работы
+void init_TimeWork(struct Stack * Task) { 		// Функция генерирования времени работы
   Task->time_work = rand()%10;
 }
 
 /***********************************************************************************************/
 
-void print_Stack ()		// Функция вывода списка задач
+void print_Stack ()					// Функция вывода списка задач
 { 
  if (num_t == 0) {
         printf("Список задач пуст!\n\n");
@@ -61,13 +61,14 @@ printf ("\n");
 }
 /***********************************************************************************************/
 
-void pop_Stack() {										// Функция удаления элемента
+void pop_Stack() {					// Функция удаления элемента
      
         if(num_t > 0)
         {
             Task[num_t-1].Next = 0;
             num_t--;
             printf("\nЗадача %d удалена!\n", num_t+1);
+			print_Stack ();	
         }
         else
             printf("\nНет задач для удаления!\n");
@@ -75,7 +76,7 @@ void pop_Stack() {										// Функция удаления элемента
 
 /***********************************************************************************************/
 
-void enter()								// Функция ввода задач
+void enter()						// Функция ввода задач
 {
 	srand(time(NULL));
 	int prior, t_work;
@@ -117,7 +118,7 @@ void enter()								// Функция ввода задач
 				//printf ("\nВ стэке  %d задач\n\n", num_t); 
 				printf ("\nВведите приоритет(1-9):");
 				scanf("%d", &prior);
-				printf ("\nВведите время выпонения задачи, сек:");
+				printf ("\nВведите время выполнения задачи, сек:");
 				scanf("%d", &t_work);
 				
 				num_t = num_t+1;
@@ -126,8 +127,8 @@ void enter()								// Функция ввода задач
 				Task[num_t].priority = prior;
 				Task[num_t].time_work = t_work;
 	
+			printf("\n");		
 			print_Stack (num_t);
-		
 			printf("\nВ стэке  %d задач\n\n", num_t );
 
 			}
@@ -136,6 +137,59 @@ void enter()								// Функция ввода задач
 		}
 	
 }
+/***********************************************************************************************/
+
+void b_sort (){
+for (int i = 1 ; i <= num_t+1; i++) { 
+     	   for(int j = 1 ; j <= num_t+1- i ; j++) {  
+            if(Task[j].priority < Task[j+1].priority) {    // сравниваем два соседних элемента.       
+ 		          				   // если они идут в неправильном порядке, то  	
+              	tmpTask = Task[j];			  //  меняем их местами. 
+             	Task[j] = Task[j+1];
+              	Task[j+1] = tmpTask; 
+              }
+          }
+     }
+
+print_Stack ();
+}
+
+/***********************************************************************************************/
+
+
+void start_task()
+{
+//Проверка стэка
+    if(num_t == 0)
+    {
+        printf( "\nСписок задач пуст!\n\n");
+        return;
+    }
+    printf("\nВыполнение задач:\n\n");
+    
+         
+
+    //Вывод списка задач
+        do
+        {
+	printf("%d %s  Priority: %d\t timework: %d\n", 
+	Task[num_t].id,
+	Task[num_t].Name,
+	Task[num_t].priority, 
+	Task[num_t].time_work);
+           
+           for(int k = 0; k < Task[num_t].time_work ; k++)
+            {
+                printf("*");
+                fflush(stdout);
+                sleep(1); 
+            }
+            printf("Задача выполнена!\n");
+            Task[num_t-1].Next = 0;
+            num_t--;
+        }while(num_t!=0);
+    }
+
 
 /***********************************************************************************************/
 
@@ -144,19 +198,20 @@ int select_menu(void)
 {
 	char s[3];
 	  int c;
-	  printf("Менеджер задач. Операции со стеком\n\n");
+	  printf("\nМенеджер задач. Операции со стеком\n\n");
 	  printf("1. Ввод задач\n");
 	  printf("2. Удаление задачи\n");
 	  printf("3. Вывод списка задач\n");
-	  printf("4. Выполнить задачи\n");
-	  printf("5. Изменить режим (стек/очередь)\n");
-	  printf("6. Выход\n");
+	  printf("4. Сортировка по приоритету\n");
+	  printf("5. Выполнить задачи\n");
+	  printf("6. Изменить режим (стек/очередь)\n");
+	  printf("7. Выход\n");
 	  do 
 		{ 	printf("\nВведите номер нужного пункта: ");
     	scanf("%s", s);
 		getchar();
 		c = atoi(s);
-	  	} while(c<0 || c>6);
+	  	} while(c<0 || c>7);
 	  return c;
 
 }
@@ -182,11 +237,13 @@ int main ()
         		break;
       		case 3: print_Stack(num_t);
         		break;
-      		case 4: printf(" %d \n\n", num_t);
+      		case 4: b_sort ();
         		break;
-			case 5: printf("Функция временно не работает\n\n");
+      		case 5: start_task();
         		break;
-			case 6: exit(0);
+		case 6: printf("Функция временно не работает\n\n");
+        		break;  
+		case 7: exit(0);
     	}
   
 	}
